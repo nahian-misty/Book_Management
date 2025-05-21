@@ -1,0 +1,22 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Loan {
+  id         Int      @id @default(autoincrement())
+  userId     Int      @map("user_id")
+  bookId     Int      @map("book_id")
+  issueDate  DateTime @default(now()) @map("issue_date")
+  dueDate    DateTime @map("due_date")
+  returnDate DateTime? @map("return_date")
+  status     String
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("loans")
+}
