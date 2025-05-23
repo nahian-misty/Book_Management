@@ -60,3 +60,78 @@ export const returned= async(loan_id)=>{
         }
     })
 }
+
+export const history= async(id)=>{
+    const loans= await prisma.loan.findMany({
+        where:{
+            userId:id,
+            //orderBy: {issueDate: desc}
+        }
+    })
+
+    const newLoans= await Promise.all(
+        loans.map(async(loan)=>{
+        const [bookResponse,userResponse]= await Promise.all([
+            fetch(`${BOOK_URL}/api/books/${loan.bookId}`, {method: 'GET'}),
+            fetch(`${USER_URL}/api/users/${loan.userId}`, {method:'GET'}),
+    ]);
+
+    if(!bookResponse.ok || !userResponse.ok){
+        throw new Error('Failed to fetch user/book info');
+    }
+
+    const bookData= await bookResponse.json();
+    //const userData= await userResponse.json();
+
+    return{
+        id: loan.id,
+            book:{
+            id:bookData.id,
+            title: bookData.title,
+            author:bookData.author,
+        },
+        issueDate: loan.issueDate,
+        dueDate:loan.dueDate,
+        return_date:loan.returnDate,
+        status:loan.status   
+    };
+    })
+);
+
+return {
+    loans: newLoans,
+    total: loans.length
+};
+    
+}
+
+export const details= async(id)=>{
+    const loan= await prisma.loan.findUnique({
+        where:{
+            id:id
+        }
+    })
+
+    const userRes= await fetch(`${USER_URL}/api/users/${loan.userId}`, {method:'GET'});
+    const bookRes= await fetch(`${BOOK_URL}/api/books/${loan.bookId}`, {method:'GET'});
+
+    const user= await userRes.json();
+    const book= await bookRes.json();
+    return {
+        id: id,
+        user:{
+            id:user.id,
+            name:user.name,
+            email:user.email
+        },
+        book:{
+            id:book.id,
+            title:book.title,
+            author:book.author
+        },
+        issue_date:loan.issueDate,
+        due_date:loan.dueDate,
+        return_date:loan.returnDate,
+        status:loan.status
+    };
+}

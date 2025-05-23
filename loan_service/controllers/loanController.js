@@ -18,3 +18,21 @@ export const returnBook= async(req,res)=>{
         res.status(500).json({error:error.message});
     }
 }
+
+export const historyBook=async(req,res)=>{
+    try {
+        const loans= await loanService.history(parseInt(req.params.id));
+        res.status(200).json(loans)
+    } catch (error) {
+        res.status(500).json({error:error.message});
+    }
+}
+
+export const detailsLoan= async(req, res)=>{
+    try {
+        const loan= await loanService.details(parseInt(req.params.id));
+        res.status(200).json(loan);
+    } catch (error) {
+        res.status(500).json({error:error.message});
+    }
+}
