@@ -12,7 +12,7 @@ export const addBook= async(req,res)=>{
 
 export const searchBook= async(req, res)=>{
     try {
-        const book= await bookService.search(req.query);
+        const book= await bookService.searchBooks(req.query.search);
         if(!book){
             return res.status(404).json({error:"no book found"})
         }
@@ -24,7 +24,7 @@ export const searchBook= async(req, res)=>{
 
 export const getBook= async(req, res)=>{
     try {
-        const book= await bookService.bookInfo(parseInt(req.params.id));
+        const book= await bookService.getBook(req.params.id);
         if(!book){
             return res.status(404).json({error:"no book found with this id"})
         }
@@ -37,7 +37,7 @@ export const getBook= async(req, res)=>{
 
 export const updateBook= async(req,res)=>{
     try {
-        const book=await bookService.updateBookInfo(parseInt(req.params.id), req.body);
+        const book=await bookService.updateBook(req.params.id, req.body);
         if(!book){
             return res.status(404).json({error:"no book found with this id"})
         }
@@ -51,8 +51,8 @@ export const updateBook= async(req,res)=>{
 
 export const updateAvailability= async(req,res)=>{
     try {
-        const {availableCopies, operation}= req.body;
-        const book= await bookService.availabilityUpdate(parseInt(req.params.id), availableCopies, operation)
+        const {available_copies, operation}= req.body;
+        const book= await bookService.updateAvailability(req.params.id, available_copies, operation)
         res.status(200).json(book)
     } catch (error) {
         res.status(500).json({error:error.message})
@@ -61,7 +61,7 @@ export const updateAvailability= async(req,res)=>{
 
 export const deleteBook= async(req,res)=>{
     try {
-        await bookService.bookDeletion(parseInt(req.params.id));
+        await bookService.deleteBook(req.params.id);
         res.status(200).json({message:"book deleted"})
     } catch (error) {
         res.status(500).json({error:error.message})       

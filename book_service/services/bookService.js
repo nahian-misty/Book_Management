@@ -1,63 +1,45 @@
-import {PrismaClient} from "@prisma/client";
-const prisma= new PrismaClient();
+import Book from "../model/book_db.js";
 
-export const createBook=async (data)=>{
-    //console.log(data.title);
-    return prisma.book.create({
-        data:{
-            title: data.title,
-            author: data.author,
-            isbn: data.isbn,
-            copies: data.copies,
-            availableCopies: data.copies
-        }
-    })
+export const createBook = async(data) => {
+  return Book.create({
+    title: data.title,
+    author: data.author,
+    isbn: data.isbn,
+    copies: data.copies,
+    availableCopies: data.copies,
+  });
+}
+export const searchBooks = async(search) => {
+  return Book.find({
+    $or: [
+      { title: { $regex: search, $options: 'i' } },
+      {author: { $regex: search, $options: 'i' } },
+      {isbn: { $regex: search, $options: 'i' } },
+    ]
+  })
+};
+
+
+export const getBook = async(id) => {
+  return Book.findById(id);
 }
 
-export const search= async(data)=>{
-    const {search}= data;
-    return prisma.book.findMany({
-        where:{
-            OR:[
-                {title: {contains:search}},
-                {author: {contains:search}},
-                {isbn: {contains:search}}
-            ]
-        }
-    })
+export const updateBook = async(id, data) => {
+  return Book.findByIdAndUpdate(id, {
+    copies: data.copies,
+    availableCopies: data.copies,
+  }, { new: true });
 }
 
-export const bookInfo= async (data)=>{
-    const id= data;
-    return prisma.book.findUnique({
-        where:{id}
-    })
+export const updateAvailability = async(id, availableCopies, operation) => {
+  const updateData = operation === 'increment' 
+    ? { $inc: { availableCopies } }
+    : { $inc: { availableCopies: -availableCopies } };
+
+  return Book.findByIdAndUpdate(id, updateData, { new: true });
 }
 
-export const updateBookInfo= async(id,data)=>{
 
-    return prisma.book.update({
-        where:{id},
-        data:{
-            copies:data.copies,
-            availableCopies:data.copies
-        }
-    })
-}
-
-export const availabilityUpdate= async(id,availabileCopies,operation)=>{
-    return prisma.book.update({
-        where:{id},
-        data:{
-            availableCopies: operation==="increment"
-            ? {increment: availabileCopies}
-            : {decrement: availabileCopies}
-        }
-    })
-}
-
-export const bookDeletion= async (id)=>{
-    return prisma.book.delete({
-        where:{id}
-    })
+export const deleteBook = async(id) => {
+  return Book.findByIdAndDelete(id);
 }

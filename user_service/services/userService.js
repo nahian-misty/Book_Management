@@ -1,28 +1,25 @@
-import {PrismaClient} from "@prisma/client";
-const prisma= new PrismaClient();
+import User from '../model/user_db.js';
 
-export const registerUser = async (data)=>{
-    return prisma.user.create({
-        data:{
-            name:data.name,
-            email:data.email,
-            role:data.role
-        }
-    })
+
+export const createUser = async (data) => {
+  return User.create({
+    name: data.name,
+    email: data.email,
+    role: data.role || 'student',
+  })
 }
 
-export const getUser = async (id)=>{
-    return prisma.user.findUnique({
-        where:{id}
-    })
+export const getUser = async (id) => {
+  return User.findOne({
+    _id: id,
+  })
 }
 
-export const updateUser = async(id, data)=>{
-    return prisma.user.update({
-        where: {id}, 
-        data:{
-            name:data.name,
-            email:data.email
-        }
-    })
+export const updateUser = async (id, data) => {
+  return User.findByIdAndUpdate(id, {
+    name: data.name,
+    email: data.email,
+  }, {
+    new: true,
+  })
 }
